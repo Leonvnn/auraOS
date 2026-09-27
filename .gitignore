@@ -1,0 +1,18 @@
+# Arduino IDE build files
+build/
+*.hex
+*.elf
+*.bin
+
+# Editors & IDEs
+.vscode/
+.pio/
+.clang-format
+
+# System files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Secrets
+secrets.h
