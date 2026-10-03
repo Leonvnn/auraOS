@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b0c">
+<meta name="color-scheme" content="dark">
+<title>AuraOS Builder v1.1</title>
+<meta name="description" content="Generate AuraOS firmware for ESP32-C3, ESP32-S3 and ESP32-C5 hardware.">
+<style>
+:root{
+  --bg:#080b0c;--panel:#0d1112;--panel2:#111718;--line:#222b2c;--line2:#354142;
+  --text:#f4f8f7;--muted:#899594;--accent:#a8f6de;--accent2:#e1fff6;
+  --warn:#ffd28a;--bad:#ff9999;--radius:18px;--shadow:0 28px 90px rgba(0,0,0,.36)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:
+radial-gradient(900px 500px at 60% -100px,rgba(93,168,145,.14),transparent 62%),var(--bg);
+color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+button,input,select{font:inherit}button{color:inherit}a{color:inherit;text-decoration:none}code,pre{font-family:"SFMono-Regular",Consolas,monospace}
+.shell{width:min(1200px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;z-index:50;background:rgba(8,11,12,.8);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)}
+nav{height:68px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:13px;letter-spacing:.14em}
+.mark{width:25px;height:25px;fill:none;stroke:var(--accent2);stroke-width:1.8}.navlinks{display:flex;gap:5px;align-items:center}
+.navlinks a{padding:8px 10px;color:var(--muted);font-size:12px;font-weight:800;border-radius:8px}.navlinks a:hover{background:#111617;color:var(--text)}
+.pill{border:1px solid var(--line2);border-radius:999px;padding:6px 10px;font-size:9px;color:#aab5b4;font-weight:900;letter-spacing:.08em}
+.hero{min-height:520px;display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:center;padding:74px 0}
+.kicker,.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.17em;font-size:10px;font-weight:900}
+.hero h1{font-size:clamp(48px,7vw,86px);line-height:.94;letter-spacing:-.055em;margin:12px 0 22px}.hero p{max-width:720px;color:#9aa5a4;font-size:18px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{min-height:44px;padding:0 16px;border:1px solid var(--line2);border-radius:10px;background:#121718;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:850;cursor:pointer}
+.btn:hover{border-color:#60716f;transform:translateY(-1px)}.btn.primary{background:var(--accent2);color:#07100d;border-color:var(--accent2)}.btn.ghost{background:transparent;color:var(--muted)}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.hero-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#101617,#0a0e0f);box-shadow:var(--shadow);overflow:hidden}
+.hero-card .top{height:44px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 15px;color:#6f7a79;font-size:9px;font-weight:900;letter-spacing:.1em}
+.hero-card .body{padding:22px}.fake{padding:13px 14px;border:1px solid var(--line2);border-radius:9px;background:#090d0e;margin-bottom:9px}.fake small,.fake strong{display:block}.fake small{color:#667271;font-size:8px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}.fake strong{font-size:12px}.fake.go{background:var(--accent2);color:#07100d;text-align:center;font-weight:900;margin-top:14px}
+.section{padding:84px 0;border-top:1px solid var(--line);scroll-margin-top:80px}.sectionhead{max-width:780px;margin-bottom:34px}.sectionhead h2{font-size:clamp(34px,5vw,54px);line-height:.98;letter-spacing:-.045em;margin:10px 0 13px}.sectionhead p{color:var(--muted);font-size:15px}
+.builder{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(340px,.58fr);gap:24px;align-items:start}.panel,.summary,.result,.guide{border:1px solid var(--line);border-radius:var(--radius);background:rgba(13,17,18,.9)}
+.block{padding:25px 27px;border-bottom:1px solid var(--line)}.block:last-child{border-bottom:0}.blocktop{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}.blocktop strong{font-size:14px}.blocktop small{display:block;color:#697574;font-size:10px;margin-top:3px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap}.tab{border:1px solid var(--line2);background:#0a0e0f;color:#8d9897;border-radius:8px;padding:8px 12px;font-size:10px;font-weight:900;cursor:pointer}.tab.active{background:#17201f;color:var(--accent2);border-color:#5c7b73}
+.boardgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.cardbtn{min-height:118px;text-align:left;padding:14px;border:1px solid var(--line2);border-radius:11px;background:#0a0e0f;cursor:pointer}.cardbtn:hover{border-color:#566463}.cardbtn.active{border-color:#80a79d;background:#111918}.cardbtn strong,.cardbtn small{display:block}.cardbtn strong{font-size:12px}.cardbtn small{margin-top:5px;color:#6e7a79;font-size:9px;line-height:1.45}
+.cardtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.chip{font:900 10px monospace;padding:3px 7px;border:1px solid #34403f;border-radius:6px}.support{font-size:8px;font-weight:900;letter-spacing:.08em}.stable{color:var(--accent)}.beta{color:var(--warn)}
+.optiongrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.opt{min-height:108px;text-align:left;padding:14px;border:1px solid var(--line2);border-radius:11px;background:#0a0e0f;cursor:pointer}.opt.active{border-color:#80a79d;background:#111918}.opt code{display:inline-block;margin-bottom:16px;border:1px solid #334140;border-radius:6px;padding:3px 6px;color:#a9b5b3;font-size:9px}.opt strong,.opt small{display:block}.opt strong{font-size:12px}.opt small{margin-top:4px;color:#72807e;font-size:9px}
+.modulegrid{display:grid}.module{min-height:67px;padding:0;border:0;border-top:1px solid #1b2223;background:transparent;display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;text-align:left;cursor:pointer}.module:first-child{border-top:0}.module strong,.module small{display:block}.module strong{font-size:12px}.module small{color:#6e7b79;font-size:9px;margin-top:2px}.module-meta{color:#64706f;font-size:9px}.switch{width:43px;height:24px;border:1px solid #3a4645;border-radius:999px;background:#222a2b;position:relative}.switch:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#7c8987;transition:.18s}.switch.on{background:var(--accent2);border-color:var(--accent2)}.switch.on:after{transform:translateX(19px);background:#07100d}
+.summary{position:sticky;top:86px;padding:22px}.summary h3{font-size:25px;letter-spacing:-.03em;margin:9px 0 2px}.summary>small{color:#6f7a79}.tags{display:flex;flex-wrap:wrap;gap:5px;margin:17px 0}.tags span{border:1px solid var(--line2);border-radius:6px;padding:4px 7px;color:#84908f;font-size:8px;font-weight:900}
+.pinbox{border:1px solid var(--line);border-radius:10px;overflow:hidden}.pinhead,.pinrows>div{display:grid;grid-template-columns:1fr auto;gap:14px;padding:9px 11px}.pinhead{background:#121718;color:#667170;font-size:8px;font-weight:900}.pinrows>div{border-top:1px solid var(--line);font-size:9px}.pinrows code{color:#c4cecc}
+.compat{margin-top:13px;padding:11px;border:1px solid var(--line2);border-radius:9px}.compat strong,.compat small{display:block}.compat strong{font-size:10px}.compat small{margin-top:4px;font-size:9px;line-height:1.5;color:#74807f}.compat.ok{background:rgba(168,246,222,.035);border-color:#263b35}.compat.bad{background:rgba(255,153,153,.04);border-color:#4b2e2e}.buildbtn{width:100%;margin-top:14px}
+.notice{margin-top:12px;padding:10px 11px;border:1px solid #4a3d25;border-radius:9px;background:rgba(255,210,138,.04);color:#c5af86;font-size:9px;line-height:1.55}
+.result{display:none;overflow:hidden}.result.show{display:block}.resulthead{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px}.resulthead strong{font-size:12px}.resulthead small{display:block;color:#64706f;font-size:9px;margin-top:2px}.codeactions{display:flex;gap:7px}.codewrap{max-height:600px;overflow:auto;background:#070a0b}.codewrap pre{margin:0;padding:20px;font-size:10px;line-height:1.65;color:#b8c3c1;white-space:pre;tab-size:2}.extras{display:flex;gap:8px;flex-wrap:wrap;padding:13px 16px;border-top:1px solid var(--line)}.extras button{font-size:9px}
+.guide{overflow:hidden}.guidehead{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.progress{display:flex;gap:5px}.progress i{width:25px;height:3px;border-radius:4px;background:#283031}.progress i.on{background:var(--accent)}.guidebody{min-height:320px;padding:28px}.guidebody h3{font-size:24px;margin:0 0 10px}.guidebody p{max-width:760px;color:#7d8987;font-size:11px}.guidegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:18px}.guidegrid>div{padding:13px;border:1px solid var(--line);border-radius:9px;background:#0a0e0f}.guidegrid strong,.guidegrid small{display:block}.guidegrid strong{font-size:10px}.guidegrid small{font-size:9px;color:#687573;margin-top:3px}.guidebody pre{white-space:pre-wrap;padding:13px;border:1px solid var(--line);border-radius:9px;background:#080b0c;color:#aab5b3;font-size:10px;line-height:1.65}.pin-guide{margin-top:16px;border:1px solid var(--line);border-radius:9px;overflow:hidden}.pin-guide>div{display:grid;grid-template-columns:1fr auto;padding:9px 11px;border-top:1px solid var(--line);font-size:9px}.pin-guide>div:first-child{border-top:0}.guidecontrols{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px;border-top:1px solid var(--line)}.guidecontrols span{font-size:9px;color:#667170;font-weight:900}
+.scopegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.scope{padding:18px;border:1px solid var(--line);border-radius:13px;background:#0b0f10}.scope strong,.scope small{display:block}.scope strong{font-size:12px}.scope small{margin-top:7px;color:#6f7c7a;font-size:10px;line-height:1.55}
+footer{min-height:130px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;color:#566261;font-size:9px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:100;max-width:350px;padding:12px 14px;border:1px solid #3a4745;border-radius:10px;background:#111718;box-shadow:var(--shadow);font-size:10px;color:#c2cdcb;opacity:0;transform:translateY(14px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}.toast.warn{border-color:#5a4728;color:#e5cb99}.toast.ok{border-color:#2d4a41;color:#bcebdc}
+@media(max-width:930px){.hero{grid-template-columns:1fr;min-height:auto}.hero-card{max-width:620px}.builder{grid-template-columns:1fr}.summary{position:static}.scopegrid{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.shell{width:min(100% - 22px,1200px)}nav{height:60px}.navlinks a{display:none}.hero{padding:52px 0}.hero h1{font-size:clamp(46px,15vw,65px)}.boardgrid,.optiongrid,.scopegrid,.guidegrid{grid-template-columns:1fr}.resulthead{align-items:flex-start;flex-direction:column}.module{grid-template-columns:1fr auto}.module-meta{display:none}footer{flex-direction:column;justify-content:center;align-items:flex-start;gap:7px}}
+</style>
+</head>
+<body>
+<header><nav class="shell">
+<a href="#home" class="brand"><svg class="mark" viewBox="0 0 16 16"><path d="M8 2L3 14M8 2l5 12M5 10h6"/></svg><span>AURAOS</span></a>
+<div class="navlinks"><a href="#builder">Builder</a><a href="#result">Code</a><a href="#guide">Tutorial</a><span class="pill">BUILDER v1.1</span></div>
+</nav></header>
+
+<main id="home">
+<section class="shell hero">
+<div><div class="kicker">Modular firmware generator</div><h1>Choose hardware.<br>Generate AuraOS.</h1>
+<p>Select an ESP32 family, display, controls and optional IR/radio modules. Aura Builder checks GPIO use, shows the final pinout, and gives you Arduino code plus a downloadable <code>.ino</code>.</p>
+<div class="actions"><a class="btn primary" href="#builder">Start building →</a><a class="btn ghost" href="#scope">Supported features</a></div></div>
+<div class="hero-card"><div class="top"><span>AURA BUILDER</span><span>C3 · S3 · C5</span></div><div class="body">
+<div class="fake"><small>Display</small><strong>128×32 · 128×64 · 128×128 · none</strong></div>
+<div class="fake"><small>Controls</small><strong>3 buttons · 1 button · none</strong></div>
+<div class="fake"><small>Modules</small><strong>IR · CC1101 · nRF24 · WebUI</strong></div>
+<div class="fake go">GENERATE CODE / DOWNLOAD .INO</div>
+</div></div>
+</section>
+
+<section class="section" id="builder"><div class="shell">
+<div class="sectionhead"><div class="eyebrow">01 — Configure</div><h2>Build the device you actually have.</h2><p>Common official boards get predefined GPIO pools. Generic profiles are available for other C3/S3/C5 boards, but the generated pinout should always be checked against the exact board revision.</p></div>
+<div class="builder">
+<div class="panel">
+  <div class="block"><div class="blocktop"><div><strong>ESP32 family</strong><small>Choose the chip family first.</small></div></div>
+    <div class="tabs"><button class="tab active" data-family="C3">ESP32-C3</button><button class="tab" data-family="S3">ESP32-S3</button><button class="tab" data-family="C5">ESP32-C5</button></div>
+  </div>
+  <div class="block"><div class="blocktop"><div><strong>Board profile</strong><small>Stable profiles are based on known board layouts; Generic is for other boards.</small></div></div><div class="boardgrid" id="boardGrid"></div></div>
+  <div class="block"><div class="blocktop"><div><strong>OLED / display</strong><small>I²C displays use U8g2 in generated firmware.</small></div></div><div class="optiongrid" id="displayGrid"></div></div>
+  <div class="block"><div class="blocktop"><div><strong>Buttons</strong><small>No buttons automatically requires the WebUI.</small></div></div>
+    <div class="optiongrid">
+      <button class="opt active" data-buttons="3"><code>3 BTN</code><strong>Three buttons</strong><small>Next · OK · Back</small></button>
+      <button class="opt" data-buttons="1"><code>1 BTN</code><strong>One button</strong><small>Tap / hold navigation</small></button>
+      <button class="opt" data-buttons="0"><code>0 BTN</code><strong>No buttons</strong><small>WebUI control</small></button>
+    </div>
+  </div>
+  <div class="block"><div class="blocktop"><div><strong>Modules</strong><small>Only selected modules are added to the sketch.</small></div></div><div class="modulegrid" id="moduleGrid"></div></div>
+</div>
+
+<aside class="summary">
+<div class="eyebrow">Live build</div><h3 id="summaryTitle">AuraOS</h3><small id="summarySub"></small>
+<div class="tags" id="tags"></div>
+<div class="pinbox"><div class="pinhead"><span>Function</span><span>GPIO</span></div><div class="pinrows" id="pinRows"></div></div>
+<div class="compat ok" id="compat"><strong>Checking…</strong><small></small></div>
+<button class="btn primary buildbtn" id="buildBtn">Generate AuraOS →</button>
+<div class="notice">CC1101/nRF24 tools in this builder are receive/monitoring focused: spectrum/RSSI/channel-activity, diagnostics and logging. Intentional RF interference is not generated.</div>
+</aside>
+</div></div></section>
+
+<section class="section" id="result"><div class="shell">
+<div class="sectionhead"><div class="eyebrow">02 — Generated firmware</div><h2>Copy it or download it.</h2><p>The generated sketch is plain Arduino C++ and can be opened directly in Arduino IDE.</p></div>
+<div class="result" id="resultBox">
+<div class="resulthead"><div><strong>Generated AuraOS sketch</strong><small id="resultMeta"></small></div><div class="codeactions"><button class="btn ghost" id="copyCode">Copy code</button><button class="btn primary" id="downloadIno">Download .ino</button></div></div>
+<div class="codewrap"><pre id="codeOut"></pre></div>
+<div class="extras"><button class="btn ghost" id="copyReadme">Copy README</button><button class="btn ghost" id="copyPinout">Copy pinout</button><button class="btn ghost" id="jumpGuide">Open tutorial ↓</button></div>
+</div></div></section>
+
+<section class="section" id="guide"><div class="shell">
+<div class="sectionhead"><div class="eyebrow">03 — Tutorial</div><h2>Wire, install, flash.</h2><p>The tutorial follows your current selections and includes the exact generated GPIO map.</p></div>
+<div class="guide">
+<div class="guidehead"><strong id="guideTitle"></strong><div class="progress" id="progress"></div></div>
+<div class="guidebody" id="guideBody"></div>
+<div class="guidecontrols"><button class="btn ghost" id="prev">← Previous</button><span id="guideCount"></span><button class="btn" id="next">Next →</button></div>
+</div></div></section>
+
+<section class="section" id="scope"><div class="shell">
+<div class="sectionhead"><div class="eyebrow">04 — RF / IR scope</div><h2>Useful lab tools without interference.</h2><p>AuraOS can still have a proper RF-lab menu. The generated radio features focus on observing and testing your own hardware rather than disrupting other devices.</p></div>
+<div class="scopegrid">
+<div class="scope"><strong>CC1101 Spectrum</strong><small>RSSI sweep around a selected sub-GHz center frequency, module status and receive monitor.</small></div>
+<div class="scope"><strong>nRF24 Activity</strong><small>2.4 GHz channel activity sweep using RPD, channel monitor and module diagnostics.</small></div>
+<div class="scope"><strong>IR tools</strong><small>IR receive monitor, last decoded value and optional NEC transmit from the WebUI.</small></div>
+</div></div></section>
+</main>
+
+<footer class="shell"><div class="brand"><svg class="mark" viewBox="0 0 16 16"><path d="M8 2L3 14M8 2l5 12M5 10h6"/></svg><span>AURAOS</span></div><div>Builder v1.1 · one-file GitHub Pages app</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+const BOARDS = {
+ "c3-supermini":{family:"C3",name:"ESP32-C3 SuperMini Plus",status:"Stable",badge:"TESTED",pool:[0,1,9,20,21],defaults:{sda:7,scl:10,irTx:6,irRx:3,btn:[2,4,5],one:4},note:"AuraOS reference C3 board."},
+ "c3-devkitm":{family:"C3",name:"ESP32-C3-DevKitM-1",status:"Stable",badge:"OFFICIAL",pool:[0,1,3,4,5,6,7,10,20,21],defaults:{sda:6,scl:7,irTx:5,irRx:3,btn:[0,1,4],one:4},note:"Official Espressif C3 board."},
+ "c3-devkitc":{family:"C3",name:"ESP32-C3-DevKitC-02",status:"Stable",badge:"OFFICIAL",pool:[0,1,3,4,5,6,7,10,20,21],defaults:{sda:6,scl:7,irTx:5,irRx:3,btn:[0,1,4],one:4},note:"Official Espressif C3 board."},
+ "c3-generic":{family:"C3",name:"Generic ESP32-C3",status:"Beta",badge:"GENERIC",pool:[0,1,3,4,5,6,7,10,20,21],defaults:{sda:6,scl:7,irTx:5,irRx:3,btn:[0,1,4],one:4},note:"For other C3 boards; verify GPIO exposure.",warning:"Generic C3 boards can reserve different GPIOs. Check the exact board pinout before wiring."},
+ "s3-devkit":{family:"S3",name:"ESP32-S3-DevKitC-1",status:"Stable",badge:"OFFICIAL",pool:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,35,36,37,38,39,40,41,42,47,48],defaults:{sda:8,scl:9,irTx:7,irRx:15,btn:[4,5,6],one:4},note:"Official S3 profile with lots of GPIO."},
+ "s3-generic":{family:"S3",name:"Generic ESP32-S3",status:"Beta",badge:"GENERIC",pool:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,35,36,37,38,39,40,41,42,47,48],defaults:{sda:8,scl:9,irTx:7,irRx:15,btn:[4,5,6],one:4},note:"For other S3 boards; verify reserved pins.",warning:"Generic S3 boards may use GPIOs for PSRAM, LEDs, cameras or displays. Verify the exact board."},
+ "c5-devkit":{family:"C5",name:"ESP32-C5-DevKitC-1",status:"Beta",badge:"OFFICIAL",pool:[0,1,4,5,6,7,8,9,10,11,12,23,24,25,26,27,28],defaults:{sda:8,scl:9,irTx:10,irRx:24,btn:[4,5,6],one:4},note:"Official C5 profile; AuraOS marks C5 as Beta.",warning:"C5 support depends on a recent Arduino-ESP32 core and library compatibility."},
+ "c5-generic":{family:"C5",name:"Generic ESP32-C5",status:"Beta",badge:"GENERIC",pool:[0,1,4,5,6,7,8,9,10,11,12,23,24,25,26,27,28],defaults:{sda:8,scl:9,irTx:10,irRx:24,btn:[4,5,6],one:4},note:"For other C5 boards; verify exact pinout.",warning:"Generic C5 boards vary. Check USB, PSRAM, strapping pins and the exact board schematic."}
+};
+
+const DISPLAYS = {
+ "none":{name:"No display",code:"NONE",w:0,h:0,ctor:""},
+ "ssd1306-32":{name:'Small OLED · SSD1306',code:"128×32",w:128,h:32,ctor:"U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C"},
+ "ssd1306-64":{name:'Medium OLED · SSD1306',code:"128×64",w:128,h:64,ctor:"U8G2_SSD1306_128X64_NONAME_F_HW_I2C"},
+ "sh1106-64":{name:'Medium OLED · SH1106',code:"128×64",w:128,h:64,ctor:"U8G2_SH1106_128X64_NONAME_F_HW_I2C"},
+ "sh1107-128":{name:'Large OLED · SH1107',code:"128×128",w:128,h:128,ctor:"U8G2_SH1107_128X128_F_HW_I2C"}
+};
+
+const state={family:"C3",board:"c3-supermini",display:"ssd1306-64",buttons:3,
+ modules:{irTx:true,irRx:true,wifi:true,webui:true,storage:true,cc1101:false,nrf24:false},
+ build:null,guide:0};
+
+const $=id=>document.getElementById(id);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const board=()=>BOARDS[state.board], display=()=>DISPLAYS[state.display];
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function toast(msg,type=""){const t=$("toast");t.textContent=msg;t.className="toast show "+type;clearTimeout(window._toast);window._toast=setTimeout(()=>t.className="toast",2800);}
+
+function renderBoards(){
+ const items=Object.entries(BOARDS).filter(([,b])=>b.family===state.family);
+ $("boardGrid").innerHTML=items.map(([id,b])=>`<button class="cardbtn ${id===state.board?"active":""}" data-board="${id}">
+ <span class="cardtop"><span class="chip">${b.family}</span><span class="support ${b.status==="Stable"?"stable":"beta"}">${b.badge}</span></span>
+ <strong>${esc(b.name)}</strong><small>${esc(b.note)}</small></button>`).join("");
+ $$("[data-board]").forEach(x=>x.onclick=()=>{state.board=x.dataset.board;state.build=null;render();});
+}
+
+function renderDisplays(){
+ $("displayGrid").innerHTML=Object.entries(DISPLAYS).map(([id,d])=>`<button class="opt ${id===state.display?"active":""}" data-display="${id}">
+ <code>${esc(d.code)}</code><strong>${esc(d.name)}</strong><small>${d.w?`${d.w} × ${d.h} · I²C`:"WebUI/Serial only"}</small></button>`).join("");
+ $$("[data-display]").forEach(x=>x.onclick=()=>{state.display=x.dataset.display;state.build=null;if(state.display==="none"&&state.buttons>0){toast("Buttons need a display to be useful, so buttons were set to none and WebUI was enabled.","warn");state.buttons=0;state.modules.wifi=true;state.modules.webui=true;}render();});
+}
+
+function setModule(k,val){
+ if((state.buttons===0 || state.display==="none") && (k==="wifi"||k==="webui") && !val){
+   toast("A build without display/buttons needs Wi‑Fi + WebUI for control.","warn");return;
+ }
+ if(k==="webui" && val && !state.modules.wifi){state.modules.wifi=true;toast("Wi‑Fi enabled because WebUI requires it.");}
+ if(k==="wifi" && !val && state.modules.webui){state.modules.webui=false;toast("WebUI was disabled because Wi‑Fi was turned off.","warn");}
+ const old=state.modules[k]; state.modules[k]=val;
+ const c=compatibility(); if(!c.ok){state.modules[k]=old;toast(c.reason,"warn");}
+ state.build=null;render();
+}
+
+function renderModules(){
+ const defs=[
+  ["irTx","IR Transmitter","Optional NEC transmit from WebUI","GPIO"],
+  ["irRx","IR Receiver","Decode and display received IR","GPIO"],
+  ["wifi","Wi‑Fi","Local AuraOS access point","Built-in"],
+  ["webui","WebUI","Browser control / status","Requires Wi‑Fi"],
+  ["storage","LittleFS","Persistent AuraOS storage","Flash"],
+  ["cc1101","CC1101","RSSI spectrum + RX monitor","SPI"],
+  ["nrf24","nRF24L01+","2.4 GHz activity sweep + diagnostics","SPI"]
+ ];
+ $("moduleGrid").innerHTML=defs.map(([k,n,d,m])=>`<button class="module" data-module="${k}">
+ <span><strong>${esc(n)}</strong><small>${esc(d)}</small></span><span class="module-meta">${esc(m)}</span><span class="switch ${state.modules[k]?"on":""}"></span></button>`).join("");
+ $$("[data-module]").forEach(x=>x.onclick=()=>setModule(x.dataset.module,!state.modules[x.dataset.module]));
+}
+
+function allocate(){
+ const b=board(), used=new Set(), pins=[];
+ function use(label,p){if(p===undefined||p===null||used.has(p))return false;used.add(p);pins.push([label,p]);return true;}
+ if(state.display!=="none"){
+  if(!use("OLED SDA",b.defaults.sda)||!use("OLED SCL",b.defaults.scl))return {ok:false,reason:"Display pins conflict on this board profile."};
+ }
+ if(state.buttons===3){for(const [label,p] of [["NEXT button",b.defaults.btn[0]],["OK button",b.defaults.btn[1]],["BACK button",b.defaults.btn[2]]])if(!use(label,p))return {ok:false,reason:"Button pins conflict on this board profile."};}
+ if(state.buttons===1){if(!use("ONE button",b.defaults.one))return {ok:false,reason:"One-button pin conflicts on this board profile."};}
+ if(state.modules.irTx&&!use("IR TX",b.defaults.irTx))return {ok:false,reason:"IR transmitter pin conflicts with another selected feature."};
+ if(state.modules.irRx&&!use("IR RX",b.defaults.irRx))return {ok:false,reason:"IR receiver pin conflicts with another selected feature."};
+
+ const pool=b.pool.filter(p=>!used.has(p)); let i=0;
+ function take(label){while(i<pool.length&&used.has(pool[i]))i++;if(i>=pool.length)return null;const p=pool[i++];used.add(p);pins.push([label,p]);return p;}
+ let spi=null,cc=null,nrf=null;
+ if(state.modules.cc1101||state.modules.nrf24){
+  const sck=take("SPI SCK"),miso=take("SPI MISO"),mosi=take("SPI MOSI");
+  if(sck===null||miso===null||mosi===null)return {ok:false,reason:"Not enough free GPIOs for the shared SPI bus. Choose fewer modules, fewer buttons, or a board with more GPIO."};
+  spi={sck,miso,mosi};
+ }
+ if(state.modules.cc1101){
+  const cs=take("CC1101 CS"),gdo0=take("CC1101 GDO0");
+  if(cs===null||gdo0===null)return {ok:false,reason:"Not enough free GPIOs for CC1101 on this configuration."};
+  cc={cs,gdo0};
+ }
+ if(state.modules.nrf24){
+  const csn=take("nRF24 CSN"),ce=take("nRF24 CE");
+  if(csn===null||ce===null)return {ok:false,reason:"Not enough free GPIOs for nRF24 on this configuration."};
+  nrf={csn,ce};
+ }
+ return {ok:true,pins,spi,cc,nrf,warnings:b.warning?[b.warning]:[]};
+}
+
+function compatibility(){
+ if((state.buttons===0||state.display==="none")&&(!state.modules.wifi||!state.modules.webui))
+  return {ok:false,reason:"No-display/no-button builds require Wi‑Fi + WebUI for control."};
+ return allocate();
+}
+
+function renderSummary(){
+ const a=compatibility(),b=board(),d=display();
+ $("summaryTitle").textContent=`AuraOS ${b.family}`;
+ $("summarySub").textContent=`${b.name} · ${b.status}`;
+ const tags=[b.family,d.code,`${state.buttons} BTN`,state.modules.irTx?"IR TX":null,state.modules.irRx?"IR RX":null,state.modules.cc1101?"CC1101":null,state.modules.nrf24?"NRF24":null,state.modules.webui?"WEBUI":null].filter(Boolean);
+ $("tags").innerHTML=tags.map(t=>`<span>${esc(t)}</span>`).join("");
+ if(a.ok){
+  $("pinRows").innerHTML=a.pins.map(([n,p])=>`<div><span>${esc(n)}</span><code>GPIO ${p}</code></div>`).join("");
+  $("compat").className="compat ok";$("compat").innerHTML=`<strong>Compatible selection</strong><small>${a.warnings.length?esc(a.warnings[0]):"GPIO allocation passed for this profile."}</small>`;$("buildBtn").disabled=false;
+ }else{
+  $("pinRows").innerHTML="";$("compat").className="compat bad";$("compat").innerHTML=`<strong>Selection blocked</strong><small>${esc(a.reason)}</small>`;$("buildBtn").disabled=true;
+ }
+}
+
+function render(){
+ $$("[data-family]").forEach(x=>x.classList.toggle("active",x.dataset.family===state.family));
+ $$("[data-buttons]").forEach(x=>x.classList.toggle("active",Number(x.dataset.buttons)===state.buttons));
+ renderBoards();renderDisplays();renderModules();renderSummary();renderGuide();
+ $("resultBox").classList.toggle("show",!!state.build);
+}
+
+function add(lines,s=""){lines.push(s);}
+function cppEscape(s){return String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"');}
+
+function generateFirmware(){
+ const b=board(),d=display(),a=allocate(); if(!a.ok)throw new Error(a.reason);
+ const pm=Object.fromEntries(a.pins.map(([n,p])=>[n,p]));
+ const L=[];
+
+ add(L,"/*");
+ add(L,"  AuraOS Builder v1.1 — generated Arduino sketch");
+ add(L,`  Target: ${b.name}`);
+ add(L,`  Display: ${d.name}`);
+ add(L,`  Buttons: ${state.buttons}`);
+ add(L,`  IR TX/RX: ${state.modules.irTx}/${state.modules.irRx}`);
+ add(L,`  CC1101/nRF24: ${state.modules.cc1101}/${state.modules.nrf24}`);
+ add(L,"");
+ add(L,"  RF radio features are monitoring-oriented: spectrum/RSSI/channel activity, diagnostics and receive logging.");
+ add(L,"*/");
+ add(L,"");
+ add(L,"#include <Arduino.h>");
+ if(state.display!=="none") add(L,"#include <Wire.h>\n#include <U8g2lib.h>");
+ if(state.modules.wifi) add(L,"#include <WiFi.h>");
+ if(state.modules.webui) add(L,"#include <WebServer.h>");
+ if(state.modules.storage) add(L,"#include <LittleFS.h>");
+ if(state.modules.irTx||state.modules.irRx) add(L,"#include <IRremoteESP8266.h>");
+ if(state.modules.irTx) add(L,"#include <IRsend.h>");
+ if(state.modules.irRx) add(L,"#include <IRrecv.h>\n#include <IRutils.h>");
+ if(state.modules.cc1101||state.modules.nrf24) add(L,"#include <SPI.h>");
+ if(state.modules.cc1101) add(L,"#include <RadioLib.h>");
+ if(state.modules.nrf24) add(L,"#include <RF24.h>");
+ add(L,"");
+
+ for(const [name,p] of a.pins){
+  const macro="PIN_"+name.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,"");
+  add(L,`#define ${macro} ${p}`);
+ }
+ add(L,"");
+ if(state.display!=="none") add(L,`${d.ctor} display(U8G2_R0, U8X8_PIN_NONE);`);
+ if(state.modules.webui) add(L,"WebServer server(80);");
+ if(state.modules.irTx) add(L,"IRsend auraIrTx(PIN_IR_TX);");
+ if(state.modules.irRx) add(L,"IRrecv auraIrRx(PIN_IR_RX);\ndecode_results auraIrResult;\nString lastIr = \"none\";");
+ if(state.modules.cc1101) add(L,"CC1101 auraCC = new Module(PIN_CC1101_CS, PIN_CC1101_GDO0, RADIOLIB_NC, RADIOLIB_NC);\nbool ccReady=false;\nfloat ccFreqMHz=433.92;");
+ if(state.modules.nrf24) add(L,"RF24 auraNrf(PIN_NRF24_CE, PIN_NRF24_CSN);\nbool nrfReady=false;");
+ add(L,"int menuIndex=0;\nunsigned long lastDraw=0;\nunsigned long buttonDownAt=0;");
+ add(L,"");
+
+ const menuItems=["Status"];
+ if(state.modules.irRx)menuItems.push("IR Receive");
+ if(state.modules.irTx)menuItems.push("IR Transmit");
+ if(state.modules.cc1101){menuItems.push("CC Spectrum");menuItems.push("CC RSSI");menuItems.push("CC RX");}
+ if(state.modules.nrf24){menuItems.push("NRF Activity");menuItems.push("NRF Channel");menuItems.push("NRF Info");}
+ menuItems.push("About");
+ add(L,`const char* MENU[] = {${menuItems.map(x=>`"${cppEscape(x)}"`).join(",")}};`);
+ add(L,`const int MENU_COUNT = ${menuItems.length};`);
+ add(L,"");
+
+ if(state.modules.cc1101){
+  add(L,`String ccSpectrumJson() {
+  if(!ccReady) return "{\\"ready\\":false}";
+  String s="{\\"ready\\":true,\\"points\\":[";
+  bool first=true;
+  for(float f=433.05; f<=434.79; f+=0.12) {
+    auraCC.setFrequency(f);
+    delay(2);
+    float r=auraCC.getRSSI();
+    if(!first) s += ",";
+    first=false;
+    s += "[" + String(f,2) + "," + String(r,1) + "]";
+  }
+  auraCC.setFrequency(ccFreqMHz);
+  s += "]}";
+  return s;
+}`);
+  add(L,"");
+ }
+ if(state.modules.nrf24){
+  add(L,`String nrfActivityJson() {
+  if(!nrfReady) return "{\\"ready\\":false}";
+  String s="{\\"ready\\":true,\\"channels\\":[";
+  bool first=true;
+  for(uint8_t ch=0; ch<126; ch+=5) {
+    auraNrf.setChannel(ch);
+    auraNrf.startListening();
+    delayMicroseconds(180);
+    bool active=auraNrf.testRPD();
+    auraNrf.stopListening();
+    if(!first) s += ",";
+    first=false;
+    s += String(active?1:0);
+  }
+  s += "]}";
+  return s;
+}`);
+  add(L,"");
+ }
+
+ if(state.modules.webui){
+  add(L,`String auraHome() {
+  return R"HTML(<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{font-family:system-ui;background:#090b0c;color:#f1f5f4;max-width:820px;margin:35px auto;padding:0 18px}button,input{padding:9px 11px;border-radius:8px;border:1px solid #364241;background:#111718;color:#f1f5f4;margin:4px}pre{background:#111718;padding:14px;border-radius:10px;overflow:auto}</style>
+  <h1>AuraOS</h1><p>${cppEscape(b.name)} · ${cppEscape(d.code)} · ${state.buttons} button(s)</p>
+  <button onclick="loadStatus()">Status</button>${state.modules.cc1101?'<button onclick="loadCC()">CC1101 Spectrum</button>':''}${state.modules.nrf24?'<button onclick="loadNRF()">nRF24 Activity</button>':''}
+  ${state.modules.irTx?'<p><input id="nec" placeholder="NEC hex e.g. 20DF10EF"><button onclick="sendIR()">Send NEC</button></p>':''}
+  <pre id="out">Ready.</pre>
+  <script>
+  async function txt(u){return await (await fetch(u)).text()}
+  async function loadStatus(){out.textContent=await txt('/api/status')}
+  ${state.modules.cc1101?"async function loadCC(){out.textContent=await txt('/api/cc-spectrum')}":""}
+  ${state.modules.nrf24?"async function loadNRF(){out.textContent=await txt('/api/nrf-activity')}":""}
+  ${state.modules.irTx?"async function sendIR(){out.textContent=await txt('/api/ir-send?code='+encodeURIComponent(nec.value))}":""}
+  <\/script>)HTML";
+}
+
+String auraStatus() {
+  String s="{";
+  s += "\\"board\\":\\"${cppEscape(b.name)}\\",";
+  s += "\\"ip\\":\\"" + WiFi.softAPIP().toString() + "\\"";
+  ${state.modules.irRx?'s += ",\\"lastIr\\":\\"" + lastIr + "\\"";':""}
+  ${state.modules.cc1101?'s += ",\\"cc1101\\":" + String(ccReady?"true":"false");':""}
+  ${state.modules.nrf24?'s += ",\\"nrf24\\":" + String(nrfReady?"true":"false");':""}
+  s += "}";
+  return s;
+}`);
+  add(L,"");
+ }
+
+ if(state.display!=="none"){
+  add(L,`void drawMenu() {
+  display.clearBuffer();
+  display.setFont(u8g2_font_6x10_tf);
+  display.drawStr(0,10,"AURAOS");
+  int rows=max(2, (${d.h}-18)/11);
+  int start=max(0, menuIndex-rows+1);
+  for(int i=0;i<rows && (start+i)<MENU_COUNT;i++) {
+    int idx=start+i, y=22+i*11;
+    if(idx==menuIndex) display.drawBox(0,y-9,${d.w},10);
+    display.setDrawColor(idx==menuIndex?0:1);
+    display.drawStr(3,y,MENU[idx]);
+    display.setDrawColor(1);
+  }
+  display.sendBuffer();
+}`);
+  add(L,"");
+ }
+
+ add(L,`void setup() {
+  Serial.begin(115200);
+  delay(150);`);
+ if(state.modules.storage)add(L,"  LittleFS.begin(true);");
+ if(state.display!=="none"){
+  add(L,`  Wire.begin(PIN_OLED_SDA, PIN_OLED_SCL);
+  display.begin();`);
+ }
+ if(state.buttons===3){
+  add(L,`  pinMode(PIN_NEXT_BUTTON,INPUT_PULLUP);
+  pinMode(PIN_OK_BUTTON,INPUT_PULLUP);
+  pinMode(PIN_BACK_BUTTON,INPUT_PULLUP);`);
+ } else if(state.buttons===1){
+  add(L,"  pinMode(PIN_ONE_BUTTON,INPUT_PULLUP);");
+ }
+ if(state.modules.irTx)add(L,"  auraIrTx.begin();");
+ if(state.modules.irRx)add(L,"  auraIrRx.enableIRIn();");
+ if(state.modules.cc1101||state.modules.nrf24)add(L,"  SPI.begin(PIN_SPI_SCK,PIN_SPI_MISO,PIN_SPI_MOSI);");
+ if(state.modules.cc1101)add(L,"  ccReady=(auraCC.begin(ccFreqMHz)==RADIOLIB_ERR_NONE);\n  if(ccReady) auraCC.startReceive();");
+ if(state.modules.nrf24)add(L,"  nrfReady=auraNrf.begin();\n  if(nrfReady){auraNrf.setPALevel(RF24_PA_MIN);auraNrf.setDataRate(RF24_1MBPS);}");
+ if(state.modules.wifi)add(L,`  WiFi.mode(WIFI_AP);
+  WiFi.softAP("AuraOS_${b.family}","aura1234");`);
+ if(state.modules.webui){
+  add(L,`  server.on("/",[](){server.send(200,"text/html",auraHome());});
+  server.on("/api/status",[](){server.send(200,"application/json",auraStatus());});`);
+  if(state.modules.cc1101)add(L,'  server.on("/api/cc-spectrum",[](){server.send(200,"application/json",ccSpectrumJson());});');
+  if(state.modules.nrf24)add(L,'  server.on("/api/nrf-activity",[](){server.send(200,"application/json",nrfActivityJson());});');
+  if(state.modules.irTx){
+    add(L,`  server.on("/api/ir-send",[](){
+    String q=server.arg("code");
+    uint32_t value=strtoul(q.c_str(),nullptr,16);
+    auraIrTx.sendNEC(value,32);
+    server.send(200,"text/plain","IR sent");
+  });`);
+  }
+  add(L,"  server.begin();");
+ }
+ add(L,"}");
+ add(L,"");
+
+ add(L,"void loop() {");
+ if(state.modules.webui)add(L,"  server.handleClient();");
+ if(state.modules.irRx)add(L,'  if(auraIrRx.decode(&auraIrResult)){lastIr=resultToHumanReadableBasic(&auraIrResult);Serial.println(lastIr);auraIrRx.resume();}');
+ if(state.buttons===3){
+  add(L,`  static bool nOld=HIGH,oOld=HIGH,bOld=HIGH;
+  bool n=digitalRead(PIN_NEXT_BUTTON),o=digitalRead(PIN_OK_BUTTON),bk=digitalRead(PIN_BACK_BUTTON);
+  if(nOld==HIGH&&n==LOW){menuIndex=(menuIndex+1)%MENU_COUNT;}
+  if(bOld==HIGH&&bk==LOW){menuIndex=(menuIndex-1+MENU_COUNT)%MENU_COUNT;}
+  if(oOld==HIGH&&o==LOW){Serial.print("Menu: ");Serial.println(MENU[menuIndex]);}
+  nOld=n;oOld=o;bOld=bk;`);
+ } else if(state.buttons===1){
+  add(L,`  static bool old=HIGH;
+  bool now=digitalRead(PIN_ONE_BUTTON);
+  if(old==HIGH&&now==LOW) buttonDownAt=millis();
+  if(old==LOW&&now==HIGH){
+    unsigned long held=millis()-buttonDownAt;
+    if(held<600) menuIndex=(menuIndex+1)%MENU_COUNT;
+    else if(held<1600) {Serial.print("Select: ");Serial.println(MENU[menuIndex]);}
+    else menuIndex=0;
+  }
+  old=now;`);
+ }
+ if(state.display!=="none")add(L,"  if(millis()-lastDraw>120){lastDraw=millis();drawMenu();}");
+ add(L,"  delay(2);");
+ add(L,"}");
+
+ return L.join("\\n");
+}
+
+function makeReadme(){
+ const a=allocate(),b=board(),d=display();
+ const libs=["Arduino-ESP32"];
+ if(state.display!=="none")libs.push("U8g2");
+ if(state.modules.irTx||state.modules.irRx)libs.push("IRremoteESP8266");
+ if(state.modules.cc1101)libs.push("RadioLib");
+ if(state.modules.nrf24)libs.push("RF24 by TMRh20");
+ return `AuraOS Builder v1.1
+======================
+
+BOARD
+-----
+${b.name}
+Family: ESP32-${b.family}
+Support: ${b.status}
+
+DISPLAY / CONTROLS
+------------------
+Display: ${d.name} (${d.code})
+Buttons: ${state.buttons}
+
+MODULES
+-------
+IR TX: ${state.modules.irTx?"Yes":"No"}
+IR RX: ${state.modules.irRx?"Yes":"No"}
+Wi-Fi: ${state.modules.wifi?"Yes":"No"}
+WebUI: ${state.modules.webui?"Yes":"No"}
+LittleFS: ${state.modules.storage?"Yes":"No"}
+CC1101: ${state.modules.cc1101?"Yes — spectrum/RSSI/RX monitoring":"No"}
+nRF24: ${state.modules.nrf24?"Yes — channel activity/diagnostics":"No"}
+
+PINOUT
+------
+${a.pins.map(([n,p])=>n.padEnd(19)+"GPIO "+p).join("\\n")}
+
+LIBRARIES
+---------
+${libs.map(x=>"- "+x).join("\\n")}
+
+NETWORK
+-------
+${state.modules.webui?`SSID: AuraOS_${b.family}
+Password: aura1234
+WebUI: http://192.168.4.1`:"WebUI disabled"}
+
+NOTES
+-----
+- Verify the generated GPIO map against the exact physical board before wiring.
+- Generic/Beta profiles may reserve pins differently.
+- CC1101/nRF24 features are monitoring-oriented; no intentional interference code is generated.
+${b.warning?`- ${b.warning}`:""}
+`;
+}
+
+function makePinout(){
+ const a=allocate(),b=board(),d=display();
+ return `${b.name}
+${d.name} · ${state.buttons} button(s)
+${"=".repeat(52)}
+
+${a.pins.map(([n,p])=>n.padEnd(21)+"GPIO "+p).join("\\n")}
+`;
+}
+
+function build(){
+ const c=compatibility();if(!c.ok){toast(c.reason,"warn");return;}
+ try{
+  const code=generateFirmware();
+  state.build={code,readme:makeReadme(),pinout:makePinout()};
+  $("codeOut").textContent=code;
+  $("resultMeta").textContent=`${board().name} · ${display().code} · ${state.buttons} button(s) · ${code.split("\\n").length} lines`;
+  $("resultBox").classList.add("show");
+  renderGuide();
+  $("result").scrollIntoView({behavior:"smooth"});
+  toast("AuraOS code generated.","ok");
+ }catch(e){console.error(e);toast("Generator error: "+e.message,"warn");}
+}
+function download(name,text){const blob=new Blob([text],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg,"ok");}catch{toast("Clipboard blocked. Select the code manually.","warn");}}
+
+function guideSteps(){
+ const a=allocate(),b=board(),d=display();
+ const libs=["Arduino-ESP32",state.display!=="none"?"U8g2":null,(state.modules.irTx||state.modules.irRx)?"IRremoteESP8266":null,state.modules.cc1101?"RadioLib":null,state.modules.nrf24?"RF24 by TMRh20":null].filter(Boolean);
+ return [
+  {title:"Check the build",body:`<p>Confirm the exact board, display and modules before wiring.</p><div class="guidegrid"><div><strong>${esc(b.name)}</strong><small>${esc(b.status)} profile</small></div><div><strong>${esc(d.name)}</strong><small>${esc(d.code)} · ${state.buttons} button(s)</small></div></div>`},
+  {title:"Wire the pinout",body:`<p>Use the generated GPIO map below. CC1101 and nRF24 share SCK/MISO/MOSI when both are enabled.</p><div class="pin-guide">${a.pins.map(([n,p])=>`<div><span>${esc(n)}</span><code>GPIO ${p}</code></div>`).join("")}</div>`},
+  {title:"Install libraries",body:`<p>Install the selected libraries using Arduino IDE's Library Manager.</p><div class="guidegrid">${libs.map(x=>`<div><strong>${esc(x)}</strong><small>Required by this build</small></div>`).join("")}</div>`},
+  {title:"Paste or download code",body:`<p>Use <strong>Copy code</strong> or <strong>Download .ino</strong>. Open it in Arduino IDE, choose an ESP32-${esc(b.family)} board profile that matches your board, then Verify.</p><pre>Target family: ESP32-${esc(b.family)}
+Board: ${esc(b.name)}
+Sketch: AuraOS_${esc(b.family)}_${esc(state.display)}_${state.buttons}btn.ino</pre>`},
+  {title:"Flash & first boot",body:`<p>Connect the board over USB, select its COM port and Upload.</p>${state.modules.webui?`<pre>Wi-Fi: AuraOS_${esc(b.family)}
+Password: aura1234
+WebUI: http://192.168.4.1</pre>`:"<p>This build uses the OLED/Serial interface and has no WebUI.</p>"}<p>${b.warning?esc(b.warning):"If upload works but a peripheral does not, re-check power and the generated GPIO wiring first."}</p>`}
+ ];
+}
+function renderGuide(){
+ const s=guideSteps();state.guide=Math.min(state.guide,s.length-1);$("guideTitle").textContent=s[state.guide].title;$("guideBody").innerHTML=`<h3>${esc(s[state.guide].title)}</h3>${s[state.guide].body}`;$("guideCount").textContent=`${state.guide+1} / ${s.length}`;$("progress").innerHTML=s.map((_,i)=>`<i class="${i<=state.guide?"on":""}"></i>`).join("");$("prev").disabled=state.guide===0;$("next").disabled=state.guide===s.length-1;
+}
+
+$$("[data-family]").forEach(x=>x.onclick=()=>{state.family=x.dataset.family;state.board=Object.keys(BOARDS).find(k=>BOARDS[k].family===state.family);state.build=null;render();});
+$$("[data-buttons]").forEach(x=>x.onclick=()=>{const n=Number(x.dataset.buttons);if(n>0&&state.display==="none"){toast("Buttons need a display in AuraOS, so choose an OLED first.","warn");return;}state.buttons=n;if(n===0){state.modules.wifi=true;state.modules.webui=true;}state.build=null;render();});
+$("buildBtn").onclick=build;
+$("copyCode").onclick=()=>state.build&&copy(state.build.code,"Code copied.");
+$("downloadIno").onclick=()=>state.build&&download(`AuraOS_${board().family}_${state.display}_${state.buttons}btn.ino`,state.build.code);
+$("copyReadme").onclick=()=>state.build&&copy(state.build.readme,"README copied.");
+$("copyPinout").onclick=()=>state.build&&copy(state.build.pinout,"Pinout copied.");
+$("jumpGuide").onclick=()=>document.getElementById("guide").scrollIntoView({behavior:"smooth"});
+$("prev").onclick=()=>{if(state.guide>0){state.guide--;renderGuide();}};
+$("next").onclick=()=>{if(state.guide<guideSteps().length-1){state.guide++;renderGuide();}};
+
+render();
+</script>
+</body></html>
