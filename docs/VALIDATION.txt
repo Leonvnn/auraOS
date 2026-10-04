@@ -1,4 +1,0 @@
-PASS 1 — outer builder JS + firmware WebUI JS syntax: OK
-PASS 2 — CC1101/nRF24/display compile guards across 8 combinations: OK
-PASS 3 — generated sketch matrix (9 builds), placeholders + 1-button GPIO cleanup: OK
-PASS 4 — exact nrfActivity regression + reverse CC regression + no jammer/deauth path: OK
