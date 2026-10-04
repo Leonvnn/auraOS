@@ -1,8 +1,0 @@
-AuraOS Builder v4.6.2
-Baseline: AuraOS v4.6
-Patch: full audit / regression fix.
-- Preserves v4.6 UI, IR, brightness, startup and RF structure.
-- Keeps v4.6.1 headless RF guards.
-- Restores WebUI .ir upload/open/send/delete and storage meter from v1.5.
-- CC1101 Scan/Copy now honors fixed-vs-band range selection.
-- Corrects stale version labels, download filename and built-in self-test target.
