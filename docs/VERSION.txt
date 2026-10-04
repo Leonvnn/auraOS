@@ -1,0 +1,5 @@
+AuraOS Builder v4.3
+UI: v1.5 restored
+IR: file browser + command picker
+Boot: pixel A -> AURA OS -> wipe
+Settings: persistent brightness
