@@ -1,0 +1,5 @@
+AuraOS Builder v4.5
+RF Tools update only.
+CC1101: Scan/Copy, Spectrum, scrolling RSSI Spectrum.
+nRF24: Scan/Copy, Channel Spectrum, scrolling RPD Spectrum.
+No jammer or arbitrary RF replay.
