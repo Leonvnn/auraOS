@@ -1,5 +1,5 @@
-AuraOS Builder v4.3
-UI: v1.5 restored
-IR: file browser + command picker
-Boot: pixel A -> AURA OS -> wipe
-Settings: persistent brightness
+AuraOS Builder v4.4
+Compile-fix release
+- Arduino auto-prototype safe page routing (uint8_t)
+- U8g2/GCC14 width type fix (no mixed min())
+- Unique v4_4 generated filename to avoid compiling stale files
